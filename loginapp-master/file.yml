@@ -1,0 +1,39 @@
+---
+- hosts: practice
+  become_user: root
+  remote_user: ansible
+  become: true
+  tasks:
+    - name: user creation111
+      user:
+        name: papu
+        state: present
+    - name: Package installation
+      yum:
+        name: docker*
+        state: latest
+    - name: service started
+      service:
+        name: docker
+        state: started
+        enabled: yes
+    - name: Pulling docker images
+      docker_image:
+        name: nginx:latest
+        source: pull
+    - name: Starting nginx container
+      docker_container:
+        name: Nginx_Container
+        image: nginx:latest
+    - name: Getting container status
+      docker_container_info:
+        command: 'docker container ls --format {{ .Names }}'
+      register: result
+    - name: Display result value
+      debug:
+        msg: "The container {{ 'exists' if result.exists else 'does not exist' }}"
+    - name: Print the status of the container
+      debug:
+        msg: "The container status is {{ result.container['State']['Status'] }}"
+      when: result.exists
+        
